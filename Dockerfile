@@ -1,4 +1,4 @@
-FROM python:3.10-bullseye
+FROM python:3.10-buster
 
 
 ###################
@@ -9,7 +9,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     build-essential autoconf libtool pkg-config \
     ca-certificates wget unzip git curl \
-    libgfortran-9-dev \
+    libgfortran-7-dev \
   && rm -rf /var/lib/apt/lists/*
 
 
@@ -30,6 +30,7 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
 ##########################
 
 ARG GRPC_RELEASE_TAG=v1.42.0
+ARG GRPC_INSTALL_DIR=/usr/local
 
 RUN echo "==================== cloning repository ====================" \
   && git clone  --recurse-submodules -b ${GRPC_RELEASE_TAG} https://github.com/grpc/grpc /var/local/git/grpc \
@@ -39,9 +40,9 @@ RUN echo "==================== cloning repository ====================" \
   && echo "==================== building grpc ====================" \
   && cmake -DgRPC_INSTALL=ON \
     -DgRPC_BUILD_TESTS=OFF \
-    -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_DIR \
+    -DCMAKE_INSTALL_PREFIX=$GRPC_INSTALL_DIR \
     ../.. \
-  && make -j \
+  && make -j 8 \
   && make install \
   && make clean \
   && cd / \
